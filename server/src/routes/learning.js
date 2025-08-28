@@ -50,18 +50,6 @@ router.get('/topics/:id/units', (req, res, next) => {
   }
 });
 
-// GET /api/units/:id
-router.get('/units/:id', (req, res, next) => {
-  try {
-    const unit = queryOne('SELECT id, title, summary, content_html FROM units WHERE id = ?', [req.params.id]);
-    if (!unit) return res.status(404).json({ status: 'error', message: 'Unit nicht gefunden' });
-    const flashcards = queryOne('SELECT COUNT(*) AS count FROM flashcards WHERE unit_id = ?', [unit.id]).count;
-    const questions = queryOne('SELECT COUNT(*) AS count FROM questions WHERE unit_id = ?', [unit.id]).count;
-    res.json({ ...unit, counts: { flashcards, questions } });
-  } catch (err) {
-    next(err);
-  }
-});
 
 // PATCH /api/units/:id
 router.patch('/units/:id', requireRole('admin', 'author'), (req, res, next) => {

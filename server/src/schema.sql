@@ -134,7 +134,7 @@ CREATE INDEX idx_options_question ON options(question_id);
 CREATE TABLE attempts (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	quiz_id INTEGER,
-	user_id INTEGER NOT NULL,
+	user_id INTEGER,
 	started_at TEXT NOT NULL,
 	finished_at TEXT,
 	score REAL,

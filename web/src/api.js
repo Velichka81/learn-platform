@@ -2,7 +2,8 @@ export async function getDueFlashcards() {
 	return fetchJSON('GET', '/api/flashcards/due/today');
 }
 // API-Wrapper
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+// Frontend läuft auf 5173; bei relativen /api/ nutzt Vite Proxy -> Backend 8090
+const BASE = import.meta.env.VITE_API_URL || '';
 let csrf = null;
 
 async function fetchJSON(method, path, body) {
@@ -16,8 +17,18 @@ async function fetchJSON(method, path, body) {
 		headers,
 		body: body ? JSON.stringify(body) : undefined,
 	});
-	if (!res.ok) throw await res.json();
-	return res.json();
+	const ct = res.headers.get('Content-Type') || '';
+	if (!res.ok) {
+		if (ct.includes('application/json')) {
+			throw await res.json();
+		} else {
+			const text = await res.text();
+			throw { status: 'error', message: text.startsWith('<') ? 'Serverfehler oder nicht angemeldet.' : text };
+		}
+	}
+	if (ct.includes('application/json')) return res.json();
+	// Fallback falls der Server unerwartet kein JSON sendet
+	return {};
 }
 
 export async function getMe() {
@@ -41,7 +52,8 @@ export async function getChapters(lfId) {
 	return fetchJSON('GET', `/api/learning-fields/${lfId}/chapters`);
 }
 export async function getTopics(chapterId) {
-	return fetchJSON('GET', `/api/chapters/${chapterId}/topics`);
+	// Server-Routen liegen (nach Reset) unter /api/learning-fields/chapters/:id/topics
+	return fetchJSON('GET', `/api/learning-fields/chapters/${chapterId}/topics`);
 }
 export async function getUnit(id) {
 	return fetchJSON('GET', `/api/units/${id}`);
@@ -49,11 +61,14 @@ export async function getUnit(id) {
 export async function getUnitFlashcards(id) {
 	return fetchJSON('GET', `/api/units/${id}/flashcards`);
 }
+export async function getLearningFieldFlashcards(lfId) {
+	return fetchJSON('GET', `/api/flashcards/learning-field/${lfId}`);
+}
 export async function reviewFlashcard(payload) {
 	return fetchJSON('POST', '/api/flashcards/review', payload);
 }
 export async function startQuiz(scope, opts) {
-	return fetchJSON('POST', '/api/quizzes/start', { scope, ...opts });
+	return fetchJSON('POST', '/api/quizzes/start', { scope, ...opts }); // bleibt kompatibel (Backend hat Legacy-Mapping)
 }
 export async function answer(attemptId, question_id, option_id) {
 	return fetchJSON('POST', `/api/quizzes/${attemptId}/answer`, { question_id, option_id });
@@ -62,5 +77,5 @@ export async function finish(attemptId) {
 	return fetchJSON('POST', `/api/quizzes/${attemptId}/finish`);
 }
 export async function getReview(attemptId) {
-	return fetchJSON('GET', `/api/attempts/${attemptId}/review`);
+	return fetchJSON('GET', `/api/quizzes/attempts/${attemptId}/review`);
 }

@@ -12,6 +12,39 @@ router.get('/units/:id/flashcards', (req, res) => {
 	res.json(cards);
 });
 
+// GET /api/flashcards/learning-field/:lfId
+// Liefert Flashcards eines Lernfelds, gruppiert nach Units (sortiert nach Unit-ID, dann Flashcard-ID)
+router.get('/learning-field/:lfId', (req, res, next) => {
+	try {
+		const rows = queryAll(`
+			SELECT 
+				u.id AS unit_id,
+				u.title AS unit_title,
+				f.id AS flashcard_id,
+				f.question,
+				f.answer,
+				f.difficulty
+			FROM flashcards f
+			JOIN units u ON u.id = f.unit_id
+			JOIN topics t ON t.id = u.topic_id
+			JOIN chapters c ON c.id = t.chapter_id
+			JOIN learning_fields lf ON lf.id = c.learning_field_id
+			WHERE lf.id = ?
+			ORDER BY u.id, f.id
+		`, [req.params.lfId]);
+		const grouped = [];
+		let current = null;
+		for (const r of rows) {
+			if (!current || current.unit_id !== r.unit_id) {
+				current = { unit_id: r.unit_id, unit_title: r.unit_title, flashcards: [] };
+				grouped.push(current);
+			}
+			current.flashcards.push({ id: r.flashcard_id, question: r.question, answer: r.answer, difficulty: r.difficulty });
+		}
+		res.json(grouped);
+	} catch (e) { next(e); }
+});
+
 // POST /api/flashcards/review
 router.post('/flashcards/review', requireAuth, (req, res) => {
 	const user = currentUser(req);

@@ -13,6 +13,7 @@ import unitsRoutes from './routes/units.js';
 import flashcardsRoutes from './routes/flashcards.js';
 import quizzesRoutes from './routes/quizzes.js';
 import errorHandler from './middleware/errors.js';
+import { ensureDevSeed } from './seed_dev.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,6 +28,17 @@ app.use(cors({
 }));
 app.options('*', cors());
 app.use(express.json());
+// Charset für alle JSON-Antworten sicherstellen
+app.use((req, res, next) => {
+	const json = res.json;
+	res.json = function (body) {
+		if (!res.get('Content-Type')) {
+			res.set('Content-Type', 'application/json; charset=utf-8');
+		}
+		return json.call(this, body);
+	};
+	next();
+});
 app.use(morgan('dev'));
 app.use(cookieSession({
 		name: 'sid',
@@ -36,6 +48,10 @@ app.use(cookieSession({
 }));
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
+// Diagnose: Umlaut-Test
+app.get('/api/test/umlaut', (req, res) => {
+	res.json({ text: 'Überprüfung: ä ö ü Ä Ö Ü ß – § €' });
+});
 
 app.get('/', (req, res) => {
   res.send('<h1>API läuft! Siehe <a href="/api/learning-fields">/api/learning-fields</a></h1>');
@@ -52,6 +68,9 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use(errorHandler);
 
 const PORT = process.env.API_PORT || 8090;
+// Dev-Seed einmalig vor dem Start sicherstellen
+ensureDevSeed();
+
 app.listen(PORT, () => {
 	console.log(`Server läuft auf Port ${PORT}`);
 });

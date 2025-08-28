@@ -1,14 +1,7 @@
--- Lernfelder (LF1–LF12)
-INSERT INTO learning_fields (code, title, exam_phase, position) VALUES
-('LF1', 'Informationstechnische Grundlagen', 'AP1', 1),
-('LF2', 'Arbeitsplatz einrichten', 'AP1', 2),
-('LF3', 'Prozesse der IT-Berufsausbildung', 'AP1', 3),
-('LF4', 'Softwareentwicklung Grundlagen', 'AP1', 4),
-('LF5', 'Datenbanken und Datenmanagement', 'AP1', 5),
-('LF6', 'Netzwerktechnik und IT-Sicherheit', 'AP1', 6),
-('LF7', 'Betriebssysteme und Virtualisierung', 'AP2', 7),
-('LF8', 'Webentwicklung und Webtechnologien', 'AP2', 8),
-('LF9', 'IT-Projektmanagement', 'AP2', 9),
-('LF10', 'Cloud- und Servicemanagement', 'AP2', 10),
-('LF11', 'IT-Support und Troubleshooting', 'AP2', 11),
-('LF12', 'Digitale Geschäftsmodelle', 'AP2', 12);
+-- Reduzierte Seed-Daten: nur LF1 mit gewünschter ID 1001
+DELETE FROM learning_fields; -- sicherstellen, dass keine alten Einträge stören
+INSERT INTO learning_fields (id, code, title, exam_phase, position) VALUES
+(1001, 'LF1', 'Das Unternehmen und die eigene Rolle im Betrieb beschreiben', 'AP1', 1);
+
+-- Optional: Sequenz hochsetzen, damit zukünftige AUTOINCREMENT IDs nicht kollidieren
+UPDATE sqlite_sequence SET seq = 1001 WHERE name = 'learning_fields';

@@ -1,4 +1,4 @@
-import { getDueFlashcards, reviewFlashcard } from '../api.js';
+import { getDueFlashcards, reviewFlashcard, getLearningFields, getLearningFieldFlashcards } from '../api.js';
 
 export function renderFlashcardsPage(outlet) {
 	if (!outlet) {
@@ -7,12 +7,80 @@ export function renderFlashcardsPage(outlet) {
 	}
 	outlet.innerHTML = `
 		<div class="card">
-			<h2>Lernkarten</h2>
-			<p>Hier startest du deine heutige Wiederholung (Leitner).</p>
-			<div id="fc-mount" style="margin-top:12px;"></div>
+			<h2 style="margin-top:0;">Lernkarten</h2>
+			<p style="margin:0 0 1rem 0;">Modus wählen: Tages-Wiederholung oder nach Lernfeld gruppiert anzeigen.</p>
+			<div class="flashcards-toolbar">
+				<button class="button small mode-btn active" id="btn-due">Fällige Karten (Heute)</button>
+				<div class="field-group">
+					<label for="lf-select">Lernfeld</label>
+					<select id="lf-select"></select>
+					<button class="button small ghost" id="btn-lf-load">Anzeigen</button>
+				</div>
+			</div>
+			<div id="fc-mount" class="flashcards-mount"></div>
 		</div>
 	`;
-	load();
+
+	init();
+
+	async function init() {
+		await populateLFSelect();
+		bindEvents();
+		// Standard: fällige Karten laden
+		loadDue();
+	}
+
+	async function populateLFSelect() {
+		const sel = outlet.querySelector('#lf-select');
+		if (!sel) return;
+		try {
+			const lfs = await getLearningFields();
+			sel.innerHTML = lfs.map(l => `<option value="${l.id}">${l.code} – ${l.title}</option>`).join('');
+		} catch(e) {
+			sel.innerHTML = '<option>Error beim Laden</option>';
+		}
+	}
+
+	function bindEvents() {
+		outlet.querySelector('#btn-due')?.addEventListener('click', () => loadDue());
+		outlet.querySelector('#btn-lf-load')?.addEventListener('click', () => {
+			const lfId = outlet.querySelector('#lf-select')?.value;
+			if (lfId) loadLF(lfId);
+		});
+	}
+
+	async function loadLF(lfId) {
+		markMode('lf');
+		const mount = outlet.querySelector('#fc-mount');
+		if (!mount) return;
+		const sel = outlet.querySelector('#lf-select');
+		const lfDisplay = sel ? sel.options[sel.selectedIndex].text : `Lernfeld ${lfId}`;
+		const lfCode = lfDisplay.split('–')[0].trim();
+		mount.innerHTML = 'Lade Lernfeld-Karten…';
+		try {
+			const grouped = await getLearningFieldFlashcards(lfId);
+			if (!grouped.length) { mount.innerHTML = '<em>Keine Karten für dieses Lernfeld.</em>'; return; }
+			const groupsHTML = grouped.map(g => {
+				return `<details class="fc-group" open><summary><span class="lf-badge">${escapeHTML(lfCode)}</span> <strong>Unit ${g.unit_id}</strong>: ${escapeHTML(g.unit_title)} <small>(${g.flashcards.length} Karten)</small></summary>` +
+				  '<ul class="fc-list">' + g.flashcards.map(c => `<li data-q="${escapeAttr(c.question)}" data-a="${escapeAttr(c.answer)}"><span class="q">${escapeHTML(c.question)}</span><br><span class="a">${escapeHTML(c.answer)}</span></li>`).join('') + '</ul></details>';
+			}).join('');
+			mount.innerHTML = `<div class="lf-active-bar"><div class="lf-active-name">${escapeHTML(lfDisplay)}</div><div class="lf-search-wrap"><input id="fc-search" type="search" placeholder="Suche (Frage/Antwort)" autocomplete="off" /></div></div><div class="lf-groups">${groupsHTML}</div>`;
+			const search = mount.querySelector('#fc-search');
+			if (search) {
+				search.addEventListener('input', () => filterCards(search.value, mount));
+			}
+		} catch(e) {
+			mount.innerHTML = '<em>Fehler beim Laden: '+ (e.message || e) +'</em>';
+		}
+	}
+
+	function markMode(mode) {
+		const dueBtn = outlet.querySelector('#btn-due');
+		if (dueBtn) dueBtn.classList.toggle('active', mode === 'due');
+		const lfBtn = outlet.querySelector('#btn-lf-load');
+		if (lfBtn) lfBtn.classList.toggle('active', mode === 'lf');
+	}
+	async function loadDue() { markMode('due'); load(); }
 	async function load() {
 		const mount = outlet.querySelector('#fc-mount');
 		if (!mount) {
@@ -22,22 +90,10 @@ export function renderFlashcardsPage(outlet) {
 		mount.innerHTML = 'Lade fällige Karten…';
 		try {
 			const cards = await getDueFlashcards();
-			console.log('API getDueFlashcards result:', cards);
-			if (!cards.length) {
-				mount.innerHTML = '<em>Heute sind keine Karten fällig. Öffne eine Unit oder füge Karten per Seed hinzu.</em>';
-				return;
-			}
+			if (!cards.length) { mount.innerHTML = '<em>Heute sind keine Karten fällig.</em>'; return; }
 			mount.innerHTML = '';
-			console.log('Starte FlashcardViewer mit', cards.length, 'Karten');
-			FlashcardViewer(mount, cards, {
-				async onReview(id, result) {
-					try { await reviewFlashcard({ flashcard_id: id, result }); } catch(e){ console.error(e); }
-				}
-			});
-		} catch(e) {
-			mount.innerHTML = '<em>Fehler beim Laden der Karten: ' + (e.message || e) + '</em>';
-			console.error('Fehler beim Laden der Karten:', e);
-		}
+			FlashcardViewer(mount, cards, { async onReview(id, result) { try { await reviewFlashcard({ flashcard_id: id, result }); } catch(e){ console.error(e); } } });
+		} catch(e) { mount.innerHTML = '<em>Fehler beim Laden der Karten: ' + (e.message || e) + '</em>'; }
 	}
 }
 
@@ -102,4 +158,32 @@ export function FlashcardViewer(mount, cards, { onReview } = {}) {
 	});
 
 	update();
+}
+
+function escapeHTML(str) {
+	return str.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+function escapeAttr(str) {
+	return escapeHTML(str).replace(/"/g, '&quot;');
+}
+function filterCards(term, mount) {
+	term = term.trim().toLowerCase();
+	const groups = mount.querySelectorAll('.fc-group');
+	let visibleCount = 0;
+	groups.forEach(g => {
+		let groupVisible = false;
+		g.querySelectorAll('li').forEach(li => {
+			const q = li.getAttribute('data-q')?.toLowerCase() || '';
+			const a = li.getAttribute('data-a')?.toLowerCase() || '';
+			const match = !term || q.includes(term) || a.includes(term);
+			li.style.display = match ? '' : 'none';
+			if (match) groupVisible = true;
+		});
+		g.style.display = groupVisible ? '' : 'none';
+		if (groupVisible) visibleCount++;
+	});
+	const bar = mount.querySelector('.lf-active-name');
+	if (bar) {
+		bar.dataset.filtered = term ? 'true' : 'false';
+	}
 }

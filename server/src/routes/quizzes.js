@@ -2,13 +2,13 @@
 import express from 'express';
 import { z } from 'zod';
 import { startQuiz, answerQuestion, finishQuiz } from '../services/quizzes.js';
-import { requireAuth, currentUser } from '../utils/auth.js';
-import { queryOne } from '../db.js';
+import { currentUser } from '../utils/auth.js';
+import { queryOne, run } from '../db.js';
 
 const router = express.Router();
 
-// POST /api/quizzes/start
-router.post('/quizzes/start', requireAuth, (req, res, next) => {
+// Handler für Quiz-Start (legacy Pfad + neuer Pfad)
+function handleStart(req, res, next) {
 	try {
 		const schema = z.object({
 			scope: z.enum(['unit', 'lf', 'ap1', 'ap2']),
@@ -17,7 +17,16 @@ router.post('/quizzes/start', requireAuth, (req, res, next) => {
 			timerSec: z.number().min(10).max(3600).nullable().optional()
 		});
 		const { scope, scopeRef, num, timerSec } = schema.parse(req.body);
-		const user = currentUser(req);
+		let user = currentUser(req);
+		if (!user) {
+			// Gast-User sicherstellen (persistenter Dummy, um NOT NULL einzuhalten)
+			let guest = queryOne('SELECT id FROM users WHERE email = ?',[ 'guest@example.com' ]);
+			if (!guest) {
+				run('INSERT INTO users (email, password_hash, display_name, role, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)', [ 'guest@example.com', 'x', 'Gast', 'learner' ]);
+				guest = queryOne('SELECT id FROM users WHERE email = ?',[ 'guest@example.com' ]);
+			}
+			user = { id: guest.id };
+		}
 		const quiz = startQuiz(user.id, { scope, scopeRef, num, timerSec });
 		res.json(quiz);
 	} catch (err) {
@@ -26,10 +35,14 @@ router.post('/quizzes/start', requireAuth, (req, res, next) => {
 		}
 		next(err);
 	}
-});
+}
+// Neuer korrekter Pfad
+router.post('/start', handleStart);
+// Legacy (doppelt /quizzes/start) für evtl. alte Frontends
+router.post('/quizzes/start', handleStart);
 
-// POST /api/quizzes/:attemptId/answer
-router.post('/quizzes/:attemptId/answer', requireAuth, (req, res, next) => {
+// POST /api/quizzes/:attemptId/answer (korrekt: /api/quizzes/:attemptId/answer)
+router.post('/:attemptId/answer', (req, res, next) => {
 	try {
 		const schema = z.object({
 			question_id: z.number(),
@@ -47,7 +60,7 @@ router.post('/quizzes/:attemptId/answer', requireAuth, (req, res, next) => {
 });
 
 // POST /api/quizzes/:attemptId/finish
-router.post('/quizzes/:attemptId/finish', requireAuth, (req, res, next) => {
+router.post('/:attemptId/finish', (req, res, next) => {
 	try {
 		const result = finishQuiz(req.params.attemptId);
 		res.json(result);
@@ -56,8 +69,8 @@ router.post('/quizzes/:attemptId/finish', requireAuth, (req, res, next) => {
 	}
 });
 
-// GET /api/attempts/:attemptId/review
-router.get('/attempts/:attemptId/review', requireAuth, (req, res, next) => {
+// GET /api/quizzes/attempts/:attemptId/review
+router.get('/attempts/:attemptId/review', (req, res, next) => {
 	try {
 		const attempt = queryOne('SELECT * FROM attempts WHERE id = ?', [req.params.attemptId]);
 		if (!attempt) return res.status(404).json({ status: 'error', message: 'Attempt nicht gefunden' });

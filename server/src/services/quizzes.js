@@ -8,11 +8,11 @@ function shuffle(arr) {
 export function buildQuestionPool(scope, scopeRef) {
 	let questions = [];
 	if (scope === 'unit') {
-		questions = queryAll('SELECT * FROM questions WHERE unit_id = ?', [scopeRef]);
+		questions = queryAll("SELECT * FROM questions WHERE unit_id = ? AND type != 'gap'", [scopeRef]);
 	} else if (scope === 'lf') {
-		questions = queryAll('SELECT q.* FROM questions q JOIN units u ON q.unit_id = u.id WHERE u.topic_id IN (SELECT t.id FROM topics t JOIN chapters c ON t.chapter_id = c.id WHERE c.learning_field_id = ?) ', [scopeRef]);
+		questions = queryAll("SELECT q.* FROM questions q JOIN units u ON q.unit_id = u.id WHERE q.type != 'gap' AND u.topic_id IN (SELECT t.id FROM topics t JOIN chapters c ON t.chapter_id = c.id WHERE c.learning_field_id = ?)", [scopeRef]);
 	} else if (scope === 'ap1' || scope === 'ap2') {
-		questions = queryAll(`SELECT q.* FROM questions q JOIN units u ON q.unit_id = u.id JOIN topics t ON u.topic_id = t.id JOIN chapters c ON t.chapter_id = c.id JOIN learning_fields lf ON c.learning_field_id = lf.id WHERE lf.exam_phase = ?`, [scope.toUpperCase()]);
+		questions = queryAll(`SELECT q.* FROM questions q JOIN units u ON q.unit_id = u.id JOIN topics t ON u.topic_id = t.id JOIN chapters c ON t.chapter_id = c.id JOIN learning_fields lf ON c.learning_field_id = lf.id WHERE q.type != 'gap' AND lf.exam_phase = ?`, [scope.toUpperCase()]);
 	}
 	return shuffle(questions);
 }
@@ -22,13 +22,16 @@ export function startQuiz(userId, { scope, scopeRef, num = 20, timerSec = null }
 	const selected = pool.slice(0, num);
 	const questionIds = selected.map(q => q.id);
 	const detail = { questionIds, answers: {} };
+	const uid = userId || null; // Gäste = null
 	const result = run(
-		'INSERT INTO attempts (quiz_id, user_id, started_at, score, detail_json, scope, scope_ref) VALUES (?, ?, datetime("now"), NULL, ?, ?, ?)',
-		[null, userId, JSON.stringify(detail), scope, scopeRef || null]
+		'INSERT INTO attempts (quiz_id, user_id, started_at, score, detail_json, scope, scope_ref) VALUES (?, ?, CURRENT_TIMESTAMP, NULL, ?, ?, ?)',
+		[null, uid, JSON.stringify(detail), scope, scopeRef || null]
 	);
 	const attempt_id = result.lastInsertRowid;
 	const questions = selected.map(q => {
-		const opts = queryAll('SELECT id, label FROM options WHERE question_id = ?', [q.id]);
+		let opts = queryAll('SELECT id, label FROM options WHERE question_id = ?', [q.id]);
+		// Optionen zufällig mischen, damit richtige Antwort Position wechselt
+		opts = shuffle(opts);
 		return { id: q.id, stem: q.stem, type: q.type, options: opts };
 	});
 	return { attempt_id, questions, timerSec };
@@ -66,6 +69,6 @@ export function finishQuiz(attemptId) {
 		}
 	}
 	const score = total ? correct / total : 0;
-	run('UPDATE attempts SET finished_at = datetime("now"), score = ?, detail_json = ? WHERE id = ?', [score, JSON.stringify(detail), attemptId]);
+	run('UPDATE attempts SET finished_at = CURRENT_TIMESTAMP, score = ?, detail_json = ? WHERE id = ?', [score, JSON.stringify(detail), attemptId]);
 	return { score, errors };
 }

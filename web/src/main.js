@@ -1,6 +1,6 @@
 import { renderLayout, setActiveLink } from './ui/layout.js';
 import { renderDashboard } from './ui/dashboard.js';
-import { renderLearning } from './ui/learning.js';
+import { renderLearning } from './ui/learning.js'; // nutzt intern jetzt renderLearningFields
 import { renderFlashcardsPage } from './ui/flashcards.js';
 import { renderQuizHome, renderApMode } from './ui/quiz.js';
 import { renderUnit } from './ui/unit.js';

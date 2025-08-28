@@ -28,7 +28,7 @@ router.post('/register', requireCsrf, async (req, res, next) => {
 		}
 		const hash = createPasswordHash(password);
 		const result = run(
-			'INSERT INTO users (email, password_hash, display_name, role, created_at) VALUES (?, ?, ?, ?, datetime("now"))',
+			'INSERT INTO users (email, password_hash, display_name, role, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)',
 			[email, hash, display_name, 'learner']
 		);
 		const user = queryOne('SELECT id, email, display_name, role FROM users WHERE id = ?', [result.lastInsertRowid]);
