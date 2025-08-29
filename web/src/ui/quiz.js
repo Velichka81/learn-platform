@@ -155,16 +155,16 @@ export function renderQuizHome(outlet) {
 		<div class="card" id="quiz-home">
 			<h2 style="margin-top:0;">Quiz</h2>
 			<p style="margin:0 0 1rem 0;">Modus wählen: gesamtes Lernfeld, einzelne Unit (über Lernfelder-Ansicht) oder Prüfungstrainings.</p>
-			<div class="quiz-toolbar" style="display:flex; gap:1rem; flex-wrap:wrap; align-items:stretch;">
-				<div class="lf-group" style="display:flex; flex-wrap:wrap; row-gap:.5rem; column-gap:.6rem; align-items:center; background:rgba(255,255,255,.06); padding:.65rem .85rem; border-radius:.85rem;">
-					<label style="font-size:.55rem; font-weight:600; letter-spacing:.7px; text-transform:uppercase; opacity:.8;">Lernfeld</label>
-					<select id="quiz-lf-select" style="background:#24143a;color:#fff;border:1px solid rgba(255,255,255,.2);padding:.5rem .7rem;border-radius:.55rem;min-width:260px;font-size:.9rem;"></select>
-					<div style="display:flex; gap:.5rem;">
-						<button class="button small" id="start-lf" style="white-space:nowrap;">LF-Quiz</button>
-						<input type="number" id="lf-num" value="20" min="5" max="60" title="Fragen" style="width:80px;background:#24143a;color:#fff;border:1px solid rgba(255,255,255,.2);padding:.4rem .5rem;border-radius:.55rem;"/>
+			<div class="quiz-toolbar">
+				<div class="lf-group">
+					<label class="lf-label">Lernfeld</label>
+					<select id="quiz-lf-select" class="lf-select"></select>
+					<div class="lf-actions">
+						<button class="button small" id="start-lf">LF-Quiz</button>
+						<input type="number" id="lf-num" value="20" min="5" max="60" title="Fragen" class="lf-num" />
 					</div>
 				</div>
-				<div style="display:flex; gap:.6rem; align-items:center;">
+				<div class="quiz-modes">
 					<a class="button small" href="#/ap1">AP1-Training</a>
 					<a class="button small" href="#/ap2">AP2-Training</a>
 				</div>

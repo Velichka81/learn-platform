@@ -4,10 +4,12 @@
   "type": "module",
   "main": "src/app.js",
   "scripts": {
-  "dev": "nodemon src/app.js",
-  "migrate:attempts-nullable-user": "node scripts/migrate_add_nullable_attempt_user.js",
-  "seed": "node src/db.js seed",
-  "reseed:lf1": "node scripts/reseed-lf1.js"
+    "dev": "nodemon src/app.js",
+    "migrate:attempts-nullable-user": "node scripts/migrate_add_nullable_attempt_user.js",
+    "seed": "node src/db.js seed",
+    "reseed:lf1": "node scripts/reseed-lf1.js",
+    "seed:lf1": "node scripts/seed_lf1_modular.js",
+    "validate:quiz": "node scripts/validate_quiz.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

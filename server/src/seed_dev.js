@@ -64,11 +64,24 @@ function seedLF1Structure(db) {
 
 function seedLF1Quiz(db) {
   try {
+    // Prefer modular fixtures if present
+    const modularDir = path.join(__dirname, '../fixtures/lf1');
+    const modularExists = fs.existsSync(path.join(modularDir, '04_quiz.sql'));
+    if (modularExists) {
+      ['01_structure.sql','02_content.sql','03_flashcards.sql','04_quiz.sql'].forEach(f => {
+        const sql = fs.readFileSync(path.join(modularDir, f), 'utf8');
+        db.exec(sql);
+      });
+      const cnt = db.prepare('SELECT COUNT(*) as c FROM questions').get().c;
+      console.log(`[seed] LF1 Quizfragen (modular) eingefügt: ${cnt}`);
+      return;
+    }
+    // Fallback legacy file
     const sqlPath = path.join(__dirname, '../fixtures/quizzes_lf1_units.sql');
     const sql = fs.readFileSync(sqlPath, 'utf8');
     db.exec(sql);
     const cnt = db.prepare('SELECT COUNT(*) as c FROM questions').get().c;
-    console.log(`[seed] LF1 Quizfragen eingefügt: ${cnt}`);
+    console.log(`[seed] LF1 Quizfragen (legacy) eingefügt: ${cnt}`);
   } catch (e) {
     console.error('[seed] Fehler beim Quiz-Seed:', e.message);
   }

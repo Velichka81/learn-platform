@@ -13,8 +13,10 @@ export function renderFlashcardsPage(outlet) {
 				<button class="button small mode-btn active" id="btn-due">Fällige Karten (Heute)</button>
 				<div class="field-group">
 					<label for="lf-select">Lernfeld</label>
-					<select id="lf-select"></select>
-					<button class="button small ghost" id="btn-lf-load">Anzeigen</button>
+					<div class="field-inline">
+						<select id="lf-select"></select>
+						<button class="button small ghost" id="btn-lf-load">Anzeigen</button>
+					</div>
 				</div>
 			</div>
 			<div id="fc-mount" class="flashcards-mount"></div>
@@ -60,8 +62,9 @@ export function renderFlashcardsPage(outlet) {
 		try {
 			const grouped = await getLearningFieldFlashcards(lfId);
 			if (!grouped.length) { mount.innerHTML = '<em>Keine Karten für dieses Lernfeld.</em>'; return; }
-			const groupsHTML = grouped.map(g => {
-				return `<details class="fc-group" open><summary><span class="lf-badge">${escapeHTML(lfCode)}</span> <strong>Unit ${g.unit_id}</strong>: ${escapeHTML(g.unit_title)} <small>(${g.flashcards.length} Karten)</small></summary>` +
+			const groupsHTML = grouped.map((g,i) => {
+				const seq = i+1; // Thema Nummer
+				return `<details class="fc-group" open><summary><span class="lf-badge">${escapeHTML(lfCode)}</span> <strong>Thema ${seq}</strong>: ${escapeHTML(g.unit_title)} <small>(${g.flashcards.length} Karten)</small></summary>` +
 				  '<ul class="fc-list">' + g.flashcards.map(c => `<li data-q="${escapeAttr(c.question)}" data-a="${escapeAttr(c.answer)}"><span class="q">${escapeHTML(c.question)}</span><br><span class="a">${escapeHTML(c.answer)}</span></li>`).join('') + '</ul></details>';
 			}).join('');
 			mount.innerHTML = `<div class="lf-active-bar"><div class="lf-active-name">${escapeHTML(lfDisplay)}</div><div class="lf-search-wrap"><input id="fc-search" type="search" placeholder="Suche (Frage/Antwort)" autocomplete="off" /></div></div><div class="lf-groups">${groupsHTML}</div>`;
