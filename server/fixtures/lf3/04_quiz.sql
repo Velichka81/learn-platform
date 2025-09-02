@@ -99,8 +99,6 @@ INSERT INTO questions(unit_id,type,stem,explanation) VALUES (310,'sc','Was bedeu
 INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Geringe Kosten',0),(last_insert_rowid(),'Doppelte Systeme zur Ausfallsicherheit',1),(last_insert_rowid(),'Nur Energiesparen',0);
 INSERT INTO questions(unit_id,type,stem,explanation) VALUES (310,'tf','Backups schützen vor Datenverlust.','Wahr.');
 INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Wahr',1),(last_insert_rowid(),'Falsch',0);
-COMMIT;
-PRAGMA foreign_keys=ON;
 INSERT INTO questions(unit_id,type,stem,explanation) VALUES (310,'mc','Was gehört zu Green IT?','Virtualisierung, energieeffiziente Geräte.');
 INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Virtualisierung',1),(last_insert_rowid(),'Energieeffiziente Geräte',1),(last_insert_rowid(),'Datenverlust',0),(last_insert_rowid(),'Redundanz',0);
 INSERT INTO questions(unit_id,type,stem,explanation) VALUES (310,'gap','Eine ____ schützt vor unbefugtem Zugriff.','Firewall');
