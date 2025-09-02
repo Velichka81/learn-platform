@@ -1,4 +1,4 @@
-// Modular seeding for LF4 using ordered fixture files (01..03)
+// Modular seeding for LF4 using ordered fixture files (01..04)
 // Usage: node scripts/seed_lf4_modular.js
 import fs from 'fs';
 import path from 'path';
@@ -13,7 +13,7 @@ const ORDER = [
   '01_structure.sql',
   '02_content.sql',
   '03_flashcards.sql',
-  // '04_quiz.sql' // noch nicht vorhanden
+  '04_quiz.sql'
 ];
 
 function runSql(db, file) {
@@ -32,8 +32,9 @@ function main() {
   db.pragma('foreign_keys=ON');
   ORDER.forEach(f => runSql(db, f));
   const units = db.prepare('SELECT COUNT(*) as c FROM units WHERE id BETWEEN 4801 AND 4809').get().c;
+  const q = db.prepare('SELECT COUNT(*) as c FROM questions WHERE unit_id BETWEEN 4801 AND 4809').get().c;
   const f = db.prepare('SELECT COUNT(*) as c FROM flashcards WHERE unit_id BETWEEN 4801 AND 4809').get().c;
-  console.log(`[seed:lf4] Units (4801-4809): ${units}, flashcards: ${f}`);
+  console.log(`[seed:lf4] Units (4801-4809): ${units}, questions: ${q}, flashcards: ${f}`);
 }
 
 main();
