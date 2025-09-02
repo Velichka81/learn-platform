@@ -10,7 +10,7 @@ const FIXTURES_DIR = path.join(__dirname, '../fixtures/lf4');
 const files = [
   '01_structure.sql',
   '02_content.sql',
-  // '03_flashcards.sql',
+  '03_flashcards.sql',
   // '04_quiz.sql',
 ];
 
@@ -38,6 +38,11 @@ async function seed() {
         await runSqlFile(db, filePath);
       }
     }
+    const counts = db.prepare(`SELECT 
+      (SELECT COUNT(*) FROM units WHERE id BETWEEN 4801 AND 4809) as units,
+      (SELECT COUNT(*) FROM flashcards WHERE unit_id BETWEEN 4801 AND 4809) as flashcards
+    `).get();
+    console.log(`[seed:lf4] Units (4801-4809): ${counts.units}, flashcards: ${counts.flashcards}`);
     console.log('[seed:lf4] Done.');
   } catch (err) {
     console.error('[seed:lf4] Error:', err);

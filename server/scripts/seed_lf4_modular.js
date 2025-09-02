@@ -1,48 +1,39 @@
-// Modular Seeder für LF4
-const fs = require('fs');
-const path = require('path');
-const sqlite3 = require('sqlite3').verbose();
-require('dotenv').config();
+// Modular seeding for LF4 using ordered fixture files (01..03)
+// Usage: node scripts/seed_lf4_modular.js
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { getDb } from '../src/db.js';
 
-const DB_PATH = process.env.DB_PATH;
-const FIXTURES_DIR = path.join(__dirname, '../fixtures/lf4');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const files = [
+const FIXTURE_DIR = path.join(__dirname, '../fixtures/lf4');
+const ORDER = [
   '01_structure.sql',
-  // '03_flashcards.sql',
-  // '04_quiz.sql',
+  '02_content.sql',
+  '03_flashcards.sql',
+  // '04_quiz.sql' // noch nicht vorhanden
 ];
 
-function runSqlFile(db, filePath) {
-  return new Promise((resolve, reject) => {
-    const sql = fs.readFileSync(filePath, 'utf8');
-    db.exec(sql, (err) => {
-      if (err) reject(err);
-      else resolve();
-    });
-  });
+function runSql(db, file) {
+  const full = path.join(FIXTURE_DIR, file);
+  if (!fs.existsSync(full)) {
+    console.warn(`[seed:lf4] Skip missing ${file}`);
+    return;
+  }
+  const sql = fs.readFileSync(full, 'utf8');
+  db.exec(sql);
+  console.log(`[seed:lf4] Executed ${file}`);
 }
 
-async function seed() {
-  if (!DB_PATH) {
-    console.error('DB_PATH not set in .env');
-    process.exit(1);
-  }
-  const db = new sqlite3.Database(DB_PATH);
-  try {
-    for (const file of files) {
-      const filePath = path.join(FIXTURES_DIR, file);
-      if (fs.existsSync(filePath)) {
-        console.log(`[seed:lf4] Executing ${file} ...`);
-        await runSqlFile(db, filePath);
-      }
-    }
-    console.log('[seed:lf4] Done.');
-  } catch (err) {
-    console.error('[seed:lf4] Error:', err);
-  } finally {
-    db.close();
-  }
+function main() {
+  const db = getDb();
+  db.pragma('foreign_keys=ON');
+  ORDER.forEach(f => runSql(db, f));
+  const units = db.prepare('SELECT COUNT(*) as c FROM units WHERE id BETWEEN 4801 AND 4809').get().c;
+  const f = db.prepare('SELECT COUNT(*) as c FROM flashcards WHERE unit_id BETWEEN 4801 AND 4809').get().c;
+  console.log(`[seed:lf4] Units (4801-4809): ${units}, flashcards: ${f}`);
 }
 
-seed();
+main();
