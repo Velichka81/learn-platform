@@ -26,9 +26,9 @@ function main() {
   const db = getDb();
   db.pragma('foreign_keys=ON');
   ORDER.forEach(f => runSql(db, f));
-  const q = db.prepare('SELECT COUNT(*) as c FROM questions WHERE unit_id BETWEEN 201 AND 224').get().c;
-  const f = db.prepare('SELECT COUNT(*) as c FROM flashcards WHERE unit_id BETWEEN 201 AND 224').get().c;
-  console.log(`[seed:lf2] Total LF2 questions (201-224): ${q}, flashcards: ${f}`);
+  const q = db.prepare('SELECT COUNT(*) as c FROM questions WHERE unit_id BETWEEN 2801 AND 2812').get().c;
+  const f = db.prepare('SELECT COUNT(*) as c FROM flashcards WHERE unit_id BETWEEN 2801 AND 2812').get().c;
+  console.log(`[seed:lf2] Total LF2 questions (2801-2812): ${q}, flashcards: ${f}`);
 }
 
 main();

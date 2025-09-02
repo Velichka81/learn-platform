@@ -31,10 +31,10 @@ function main() {
   const db = getDb();
   db.pragma('foreign_keys=ON');
   ORDER.forEach(f => runSql(db, f));
-  const units = db.prepare('SELECT COUNT(*) as c FROM units WHERE id BETWEEN 301 AND 310').get().c;
-  const q = db.prepare('SELECT COUNT(*) as c FROM questions WHERE unit_id BETWEEN 301 AND 310').get().c;
-  const f = db.prepare('SELECT COUNT(*) as c FROM flashcards WHERE unit_id BETWEEN 301 AND 310').get().c;
-  console.log(`[seed:lf3] Units: ${units}, questions: ${q}, flashcards: ${f}`);
+  const units = db.prepare('SELECT COUNT(*) as c FROM units WHERE id BETWEEN 3601 AND 3610').get().c;
+  const q = db.prepare('SELECT COUNT(*) as c FROM questions WHERE unit_id BETWEEN 3601 AND 3610').get().c;
+  const f = db.prepare('SELECT COUNT(*) as c FROM flashcards WHERE unit_id BETWEEN 3601 AND 3610').get().c;
+  console.log(`[seed:lf3] Units (3601-3610): ${units}, questions: ${q}, flashcards: ${f}`);
 }
 
 main();
