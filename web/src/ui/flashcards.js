@@ -28,7 +28,7 @@ export function renderFlashcardsPage(outlet) {
 	async function init() {
 		await populateLFSelect();
 		bindEvents();
-		// Standard: fällige Karten laden
+		// Standard: fällige Karten laden (künftig könnte letzter Modus aus localStorage gelesen werden)
 		loadDue();
 	}
 
@@ -49,6 +49,14 @@ export function renderFlashcardsPage(outlet) {
 			const lfId = outlet.querySelector('#lf-select')?.value;
 			if (lfId) loadLF(lfId);
 		});
+		// NEU: automatisch beim Wechsel des Lernfeldes laden (ohne extra Klick auf "Anzeigen")
+		const sel = outlet.querySelector('#lf-select');
+		if (sel) {
+			sel.addEventListener('change', () => {
+				const lfId = sel.value;
+				if (lfId) loadLF(lfId);
+			});
+		}
 	}
 
 	async function loadLF(lfId) {
@@ -57,24 +65,39 @@ export function renderFlashcardsPage(outlet) {
 		if (!mount) return;
 		const sel = outlet.querySelector('#lf-select');
 		const lfDisplay = sel ? sel.options[sel.selectedIndex].text : `Lernfeld ${lfId}`;
-		const lfCode = lfDisplay.split('–')[0].trim();
 		mount.innerHTML = 'Lade Lernfeld-Karten…';
 		try {
 			const grouped = await getLearningFieldFlashcards(lfId);
 			if (!grouped.length) { mount.innerHTML = '<em>Keine Karten für dieses Lernfeld.</em>'; return; }
-			const groupsHTML = grouped.map((g,i) => {
-				const seq = i+1; // Thema Nummer
-				return `<details class="fc-group" open><summary><span class="lf-badge">${escapeHTML(lfCode)}</span> <strong>Thema ${seq}</strong>: ${escapeHTML(g.unit_title)} <small>(${g.flashcards.length} Karten)</small></summary>` +
-				  '<ul class="fc-list">' + g.flashcards.map(c => `<li data-q="${escapeAttr(c.question)}" data-a="${escapeAttr(c.answer)}"><span class="q">${escapeHTML(c.question)}</span><br><span class="a">${escapeHTML(c.answer)}</span></li>`).join('') + '</ul></details>';
-			}).join('');
-			mount.innerHTML = `<div class="lf-active-bar"><div class="lf-active-name">${escapeHTML(lfDisplay)}</div><div class="lf-search-wrap"><input id="fc-search" type="search" placeholder="Suche (Frage/Antwort)" autocomplete="off" /></div></div><div class="lf-groups">${groupsHTML}</div>`;
-			const search = mount.querySelector('#fc-search');
-			if (search) {
-				search.addEventListener('input', () => filterCards(search.value, mount));
+			// Alle Karten in ein Deck flatten (Reihenfolge: nach Units, dann ID)
+			const deck = [];
+			grouped.forEach(g => g.flashcards.forEach(fc => deck.push(fc)));
+			const originalOrder = deck.map(c => c); // Kopie merken
+			mount.innerHTML = `<div class="lf-active-bar" style="margin-bottom:12px;"><div class="lf-active-name">${escapeHTML(lfDisplay)}</div><div style="margin-left:auto; display:flex; gap:6px;"><button class="button button--ghost small" id="deck-shuffle">Mischen</button><button class="button button--ghost small" id="deck-restart" disabled>Neu starten</button></div></div><div id="lf-deck"></div>`;
+			const deckMount = mount.querySelector('#lf-deck');
+			// Nutzung vorhandener FlashcardViewer-Komponente
+			FlashcardViewer(deckMount, deck, { async onReview(id, result){ try { await reviewFlashcard({ flashcard_id:id, result }); } catch(e){} } });
+			// Zusatz-Controls
+			const shuffleBtn = mount.querySelector('#deck-shuffle');
+			const restartBtn = mount.querySelector('#deck-restart');
+			if (shuffleBtn) {
+				shuffleBtn.addEventListener('click', () => {
+					for (let i=deck.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
+					deckMount.innerHTML = '';
+					FlashcardViewer(deckMount, deck, { async onReview(id, result){ try { await reviewFlashcard({ flashcard_id:id, result }); } catch(e){} } });
+					restartBtn.disabled = false;
+				});
 			}
-		} catch(e) {
-			mount.innerHTML = '<em>Fehler beim Laden: '+ (e.message || e) +'</em>';
-		}
+			if (restartBtn) {
+				restartBtn.addEventListener('click', () => {
+					// ursprüngliche Reihenfolge wieder herstellen
+					deck.splice(0, deck.length, ...originalOrder.map(c => c));
+					deckMount.innerHTML = '';
+					FlashcardViewer(deckMount, deck, { async onReview(id, result){ try { await reviewFlashcard({ flashcard_id:id, result }); } catch(e){} } });
+					restartBtn.disabled = true;
+				});
+			}
+		} catch(e) { mount.innerHTML = '<em>Fehler beim Laden: '+ (e.message || e) +'</em>'; }
 	}
 
 	function markMode(mode) {
@@ -190,3 +213,25 @@ function filterCards(term, mount) {
 		bar.dataset.filtered = term ? 'true' : 'false';
 	}
 }
+
+// Fügt einmalig CSS für Flip/Reveal hinzu
+let revealCssAdded = false;
+function injectRevealStyles() {
+	if (revealCssAdded) return;
+	const style = document.createElement('style');
+	style.textContent = `
+		.fc-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+		.fc-item { background:#251437; border:1px solid #3c235a; padding:10px 12px; border-radius:6px; cursor:pointer; position:relative; transition:background .2s; }
+		.fc-item:hover { background:#2e1b48; }
+		.fc-item.revealed { background:#2f2544; }
+		.fc-item .a { margin-top:6px; color:#d9c9ff; }
+		.fc-item .q { font-weight:600; }
+		.fc-item:focus-visible { outline:2px solid #8257e6; outline-offset:2px; }
+		.lf-mode-switch { display:flex; gap:4px; margin-left:12px; }
+		.lf-groups[data-view="einzel"] { display:none; }
+	`;
+	document.head.appendChild(style);
+	revealCssAdded = true;
+}
+
+// (Alter Listen-/Einzelmodus entfernt – jetzt nur Deck-Viewer)

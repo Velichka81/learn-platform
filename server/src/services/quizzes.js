@@ -29,7 +29,8 @@ export function startQuiz(userId, { scope, scopeRef, num = 20, timerSec = null }
 	);
 	const attempt_id = result.lastInsertRowid;
 	const questions = selected.map(q => {
-		let opts = queryAll('SELECT id, label FROM options WHERE question_id = ?', [q.id]);
+		// Include correctness flag for immediate feedback UI (client-side should avoid exposing directly if hiding answers is desired)
+		let opts = queryAll('SELECT id, label, is_correct FROM options WHERE question_id = ?', [q.id]);
 		// Optionen zufällig mischen, damit richtige Antwort Position wechselt
 		opts = shuffle(opts);
 		return { id: q.id, stem: q.stem, type: q.type, options: opts };
@@ -42,8 +43,16 @@ export function answerQuestion(attemptId, questionId, optionId) {
 	if (!attempt) throw new Error('Attempt nicht gefunden');
 	const detail = JSON.parse(attempt.detail_json);
 	if (!detail.answers) detail.answers = {};
-	if (!detail.answers[questionId]) detail.answers[questionId] = [];
-	if (!detail.answers[questionId].includes(optionId)) detail.answers[questionId].push(optionId);
+	// Ermitteln Fragetyp für korrektes Speichern
+	const q = queryOne('SELECT type FROM questions WHERE id = ?', [questionId]);
+	if (!q) throw new Error('Frage nicht gefunden');
+	if (q.type === 'sc' || q.type === 'tf') {
+		// Einzelwahl: immer letzte Auswahl überschreiben
+		detail.answers[questionId] = [optionId];
+	} else {
+		if (!detail.answers[questionId]) detail.answers[questionId] = [];
+		if (!detail.answers[questionId].includes(optionId)) detail.answers[questionId].push(optionId);
+	}
 	run('UPDATE attempts SET detail_json = ? WHERE id = ?', [JSON.stringify(detail), attemptId]);
 }
 
@@ -59,8 +68,9 @@ export function finishQuiz(attemptId) {
 		total++;
 		if (q.type === 'sc' || q.type === 'tf') {
 			const correctOpt = opts.find(o => o.is_correct);
-			if (userAns.length === 1 && correctOpt && userAns[0] === correctOpt.id) correct++;
-			else errors.push({ qid, explanation: q.explanation });
+			// Wertung auf Basis letzter Auswahl (falls historische Mehrfachwerte existieren)
+			const last = userAns[userAns.length - 1];
+			if (last && correctOpt && last === correctOpt.id) correct++; else errors.push({ qid, explanation: q.explanation });
 		} else if (q.type === 'mc') {
 			const correctIds = opts.filter(o => o.is_correct).map(o => o.id).sort();
 			const userIds = [...userAns].sort();

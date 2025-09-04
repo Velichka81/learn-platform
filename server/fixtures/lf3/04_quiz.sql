@@ -1,107 +1,160 @@
-PRAGMA foreign_keys=OFF;
+PRAGMA foreign_keys=ON;
 BEGIN TRANSACTION;
 DELETE FROM options WHERE question_id IN (SELECT id FROM questions WHERE unit_id BETWEEN 3601 AND 3610);
 DELETE FROM questions WHERE unit_id BETWEEN 3601 AND 3610;
 
--- LF3 Quiz: Original + eigene, thematisch passende Ergänzungen, keine Dopplungen
--- 301 Einführung in Netzwerke & Unternehmensbeispiel
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (3601,'sc','Welches Ziel hat ein Firmennetzwerk?','Kommunikation, Daten- & Ressourcenverbund.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Nur Internetzugang',0),(last_insert_rowid(),'Nur Druckdienste',0),(last_insert_rowid(),'Kommunikation, Daten- & Ressourcenverbund',1),(last_insert_rowid(),'Nur Spielezugang',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (301,'tf','Ein Router verbindet verschiedene Netzwerke.','Wahr.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Wahr',1),(last_insert_rowid(),'Falsch',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (301,'mc','Welche Geräte sind typische Netzwerkkomponenten?','Router, Switch, Access Point.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Router',1),(last_insert_rowid(),'Switch',1),(last_insert_rowid(),'Access Point',1),(last_insert_rowid(),'Monitor',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (301,'gap','Ein ____ nutzt Dienste im Netzwerk.','Client.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Client',1);
+INSERT INTO questions(unit_id,type,stem,explanation) VALUES
+(3601,'sc','Welches Ziel hat ein Firmennetzwerk?','Kommunikation, Daten- & Ressourcenverbund.'),
+(3601,'tf','Ein Router verbindet verschiedene Netzwerke.','Wahr.'),
+(3601,'mc','Welche Geräte sind typische Netzwerkkomponenten?','Router, Switch, Access Point.'),
+(3601,'gap','Ein ____ nutzt Dienste im Netzwerk.','Client.'),
+(3602,'sc','Was ist ein Node?','Knotenpunkt im Netzwerk.'),
+(3602,'tf','Jeder Host braucht eine Adresse.','Wahr.'),
+(3602,'mc','Welche Aufgaben hat ein Switch?','Verbindet Geräte, leitet Datenpakete.'),
+(3602,'gap','Ein Router ____ Netze.','verbindet'),
+(3603,'sc','Was ist ein LAN?','Lokales Netzwerk in einem Gebäude.'),
+(3603,'tf','Ein Peer-to-Peer-Netz hat keine zentrale Steuerung.','Wahr.'),
+(3603,'mc','Welche Netztypen gibt es?','LAN, WAN, MAN, PAN.'),
+(3603,'gap','Ein VPN ist ein ____ durchs Internet.','sicherer Tunnel'),
+(3604,'sc','Was ist Colocation?','Eigene Hardware im fremden Rechenzentrum.'),
+(3604,'tf','Ein File-Server stellt Speicherplatz für Dateien bereit.','Wahr.'),
+(3604,'mc','Welche Servertypen gibt es?','File, Print, Mail, DNS, Web, Terminal, NAS.'),
+(3604,'gap','Ein ____-Server verwaltet Druckaufträge.','Print'),
+(3605,'sc','Was ist ein Fat Client?','Leistungsfähiger PC mit eigener Rechenleistung.'),
+(3605,'tf','Zero Clients haben kein eigenes Betriebssystem.','Wahr.'),
+(3605,'mc','Welche mobilen Clients gibt es?','Notebook, Tablet, Smartphone.'),
+(3605,'gap','BYOD steht für Bring Your ____ Device.','Own'),
+(3606,'sc','Was ist Bandbreite?','Übertragungskapazität.'),
+(3606,'tf','Simplex bedeutet Übertragung in beide Richtungen gleichzeitig.','Falsch: nur eine Richtung.'),
+(3606,'mc','Welche Übertragungsarten gibt es?','Seriell, Parallel, Simplex, Duplex.'),
+(3606,'gap','Unicast ist eine ____-zu-____ Kommunikation.','1:1'),
+(3607,'sc','Vorteil Glasfaser?','Hohe Geschwindigkeit, weite Strecken.'),
+(3607,'tf','Kupferkabel ist günstiger als Glasfaser.','Wahr.'),
+(3607,'mc','Welche Topologien gibt es?','Stern, Bus, Ring, Masche, Zelle.'),
+(3607,'gap','Strukturierte ____ ist Standard im Unternehmen.','Verkabelung'),
+(3608,'sc','Was ist CSMA/CA?','Zugriff mit Kollisionsvermeidung.'),
+(3608,'tf','Ethernet ist weltweit Standard für LAN.','Wahr.'),
+(3608,'mc','Welche Zugriffsverfahren gibt es?','CSMA/CD, CSMA/CA, Token Passing.'),
+(3608,'gap','Ethernet ist ____kompatibel und günstig.','abwärts'),
+(3609,'sc','Was ist eine MAC-Adresse?','Hardware-Adresse.'),
+(3609,'tf','IPv6 bietet mehr Adressen als IPv4.','Wahr.'),
+(3609,'mc','Welche Protokolle gehören zur TCP/IP-Familie?','DHCP, DNS, HTTP.'),
+(3609,'gap','Ein Port ist eine ____ zur Anwendungserkennung.','Nummer'),
+(3610,'sc','Was bedeutet Redundanz?','Doppelte Systeme zur Ausfallsicherheit.'),
+(3610,'tf','Backups schützen vor Datenverlust.','Wahr.'),
+(3610,'mc','Was gehört zu Green IT?','Virtualisierung, energieeffiziente Geräte.'),
+(3610,'gap','Eine ____ schützt vor unbefugtem Zugriff.','Firewall');
 
--- 302 Hauptbestandteile von Computernetzen
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (3602,'sc','Was ist ein Node?','Knotenpunkt im Netzwerk.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Kabel',0),(last_insert_rowid(),'Knotenpunkt im Netzwerk',1),(last_insert_rowid(),'Druckerpatrone',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (302,'tf','Jeder Host braucht eine Adresse.','Wahr.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Wahr',1),(last_insert_rowid(),'Falsch',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (302,'mc','Welche Aufgaben hat ein Switch?','Verbindet Geräte, leitet Datenpakete.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Verbindet Geräte',1),(last_insert_rowid(),'Leitet Datenpakete',1),(last_insert_rowid(),'Vergibt IP-Adressen',0),(last_insert_rowid(),'Druckt Dokumente',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (302,'gap','Ein Router ____ Netze.','verbindet');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'verbindet',1);
-
--- 303 Computernetze im Überblick
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (3603,'sc','Was ist ein LAN?','Lokales Netzwerk in einem Gebäude.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Weiträumiges Netz',0),(last_insert_rowid(),'Lokales Netzwerk in einem Gebäude',1),(last_insert_rowid(),'Virtuelles Netz',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (303,'tf','Ein Peer-to-Peer-Netz hat keine zentrale Steuerung.','Wahr.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Wahr',1),(last_insert_rowid(),'Falsch',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (303,'mc','Welche Netztypen gibt es?','LAN, WAN, MAN, PAN.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'LAN',1),(last_insert_rowid(),'WAN',1),(last_insert_rowid(),'MAN',1),(last_insert_rowid(),'Desktop',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (303,'gap','Ein VPN ist ein ____ durchs Internet.','sicherer Tunnel');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'sicherer Tunnel',1);
-
--- 304 Rechenzentren & Serversysteme
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (3604,'sc','Was ist Colocation?','Eigene Hardware im fremden Rechenzentrum.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Cloud-Backup',0),(last_insert_rowid(),'Eigene Hardware im fremden Rechenzentrum',1),(last_insert_rowid(),'Virtuelles LAN',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (304,'tf','Ein File-Server stellt Speicherplatz für Dateien bereit.','Wahr.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Wahr',1),(last_insert_rowid(),'Falsch',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (304,'mc','Welche Servertypen gibt es?','File, Print, Mail, DNS, Web, Terminal, NAS.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'File',1),(last_insert_rowid(),'Print',1),(last_insert_rowid(),'Mail',1),(last_insert_rowid(),'Monitor',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (304,'gap','Ein ____-Server verwaltet Druckaufträge.','Print');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Print',1);
-
--- 305 Clients im Überblick
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (3605,'sc','Was ist ein Fat Client?','Leistungsfähiger PC mit eigener Rechenleistung.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Minimal-Hardware',0),(last_insert_rowid(),'Leistungsfähiger PC mit eigener Rechenleistung',1),(last_insert_rowid(),'Nur Netzwerk',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (305,'tf','Zero Clients haben kein eigenes Betriebssystem.','Wahr.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Wahr',1),(last_insert_rowid(),'Falsch',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (305,'mc','Welche mobilen Clients gibt es?','Notebook, Tablet, Smartphone.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Notebook',1),(last_insert_rowid(),'Tablet',1),(last_insert_rowid(),'Smartphone',1),(last_insert_rowid(),'Server',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (305,'gap','BYOD steht für Bring Your ____ Device.','Own');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Own',1);
-
--- 306 Grundlagen der Datenübertragung
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (3606,'sc','Was ist Bandbreite?','Übertragungskapazität.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Übertragungskapazität',1),(last_insert_rowid(),'Signalgeschwindigkeit',0),(last_insert_rowid(),'Datenrate',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (306,'tf','Simplex bedeutet Übertragung in beide Richtungen gleichzeitig.','Falsch: nur eine Richtung.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Wahr',0),(last_insert_rowid(),'Falsch',1);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (306,'mc','Welche Übertragungsarten gibt es?','Seriell, Parallel, Simplex, Duplex.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Seriell',1),(last_insert_rowid(),'Parallel',1),(last_insert_rowid(),'Simplex',1),(last_insert_rowid(),'Desktop',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (306,'gap','Unicast ist eine ____-zu-____ Kommunikation.','1:1');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'1:1',1);
-
--- 307 Netzwerkmedien & Topologien
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (3607,'sc','Vorteil Glasfaser?','Hohe Geschwindigkeit, weite Strecken.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Billig',0),(last_insert_rowid(),'Hohe Geschwindigkeit, weite Strecken',1),(last_insert_rowid(),'Nur im Ring nutzbar',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (307,'tf','Kupferkabel ist günstiger als Glasfaser.','Wahr.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Wahr',1),(last_insert_rowid(),'Falsch',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (307,'mc','Welche Topologien gibt es?','Stern, Bus, Ring, Masche, Zelle.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Stern',1),(last_insert_rowid(),'Bus',1),(last_insert_rowid(),'Ring',1),(last_insert_rowid(),'Desktop',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (307,'gap','Strukturierte ____ ist Standard im Unternehmen.','Verkabelung');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Verkabelung',1);
-
--- 308 Zugriffsverfahren & Ethernet
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (3608,'sc','Was ist CSMA/CA?','Zugriff mit Kollisionsvermeidung.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Kollisionserkennung',0),(last_insert_rowid(),'Kollisionsvermeidung',1),(last_insert_rowid(),'Token',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (308,'tf','Ethernet ist weltweit Standard für LAN.','Wahr.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Wahr',1),(last_insert_rowid(),'Falsch',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (308,'mc','Welche Zugriffsverfahren gibt es?','CSMA/CD, CSMA/CA, Token Passing.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'CSMA/CD',1),(last_insert_rowid(),'CSMA/CA',1),(last_insert_rowid(),'Token Passing',1),(last_insert_rowid(),'Simplex',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (308,'gap','Ethernet ist ____kompatibel und günstig.','abwärts');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'abwärts',1);
-
--- 309 Adressierung & Protokolle
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (3609,'sc','Was ist eine MAC-Adresse?','Hardware-Adresse.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Hardware-Adresse',1),(last_insert_rowid(),'Logische Adresse',0),(last_insert_rowid(),'Protokoll',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (309,'tf','IPv6 bietet mehr Adressen als IPv4.','Wahr.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Wahr',1),(last_insert_rowid(),'Falsch',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (309,'mc','Welche Protokolle gehören zur TCP/IP-Familie?','DHCP, DNS, HTTP.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'DHCP',1),(last_insert_rowid(),'DNS',1),(last_insert_rowid(),'HTTP',1),(last_insert_rowid(),'SMS',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (309,'gap','Ein Port ist eine ____ zur Anwendungserkennung.','Nummer');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Nummer',1);
-
--- 310 Sicherheit, Redundanz & Green IT
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (3610,'sc','Was bedeutet Redundanz?','Doppelte Systeme zur Ausfallsicherheit.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Geringe Kosten',0),(last_insert_rowid(),'Doppelte Systeme zur Ausfallsicherheit',1),(last_insert_rowid(),'Nur Energiesparen',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (310,'tf','Backups schützen vor Datenverlust.','Wahr.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Wahr',1),(last_insert_rowid(),'Falsch',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (310,'mc','Was gehört zu Green IT?','Virtualisierung, energieeffiziente Geräte.');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Virtualisierung',1),(last_insert_rowid(),'Energieeffiziente Geräte',1),(last_insert_rowid(),'Datenverlust',0),(last_insert_rowid(),'Redundanz',0);
-INSERT INTO questions(unit_id,type,stem,explanation) VALUES (310,'gap','Eine ____ schützt vor unbefugtem Zugriff.','Firewall');
-INSERT INTO options(question_id,label,is_correct) VALUES (last_insert_rowid(),'Firewall',1);
+INSERT INTO options(question_id,label,is_correct) VALUES
+-- 3601
+((SELECT id FROM questions WHERE unit_id=3601 AND type='sc' LIMIT 1),'Nur Internetzugang',0),
+((SELECT id FROM questions WHERE unit_id=3601 AND type='sc' LIMIT 1),'Nur Druckdienste',0),
+((SELECT id FROM questions WHERE unit_id=3601 AND type='sc' LIMIT 1),'Kommunikation, Daten- & Ressourcenverbund',1),
+((SELECT id FROM questions WHERE unit_id=3601 AND type='sc' LIMIT 1),'Nur Spielezugang',0),
+((SELECT id FROM questions WHERE unit_id=3601 AND type='tf' LIMIT 1),'Wahr',1),
+((SELECT id FROM questions WHERE unit_id=3601 AND type='tf' LIMIT 1),'Falsch',0),
+((SELECT id FROM questions WHERE unit_id=3601 AND type='mc' LIMIT 1),'Router',1),
+((SELECT id FROM questions WHERE unit_id=3601 AND type='mc' LIMIT 1),'Switch',1),
+((SELECT id FROM questions WHERE unit_id=3601 AND type='mc' LIMIT 1),'Access Point',1),
+((SELECT id FROM questions WHERE unit_id=3601 AND type='mc' LIMIT 1),'Monitor',0),
+-- 3602
+((SELECT id FROM questions WHERE unit_id=3602 AND type='sc' LIMIT 1),'Kabel',0),
+((SELECT id FROM questions WHERE unit_id=3602 AND type='sc' LIMIT 1),'Knotenpunkt im Netzwerk',1),
+((SELECT id FROM questions WHERE unit_id=3602 AND type='sc' LIMIT 1),'Druckerpatrone',0),
+((SELECT id FROM questions WHERE unit_id=3602 AND type='sc' LIMIT 1),'Monitor',0),
+((SELECT id FROM questions WHERE unit_id=3602 AND type='tf' LIMIT 1),'Wahr',1),
+((SELECT id FROM questions WHERE unit_id=3602 AND type='tf' LIMIT 1),'Falsch',0),
+((SELECT id FROM questions WHERE unit_id=3602 AND type='mc' LIMIT 1),'Verbindet Geräte',1),
+((SELECT id FROM questions WHERE unit_id=3602 AND type='mc' LIMIT 1),'Leitet Datenpakete',1),
+((SELECT id FROM questions WHERE unit_id=3602 AND type='mc' LIMIT 1),'Vergibt IP-Adressen',0),
+((SELECT id FROM questions WHERE unit_id=3602 AND type='mc' LIMIT 1),'Druckt Dokumente',0),
+-- 3603
+((SELECT id FROM questions WHERE unit_id=3603 AND type='sc' LIMIT 1),'Weiträumiges Netz',0),
+((SELECT id FROM questions WHERE unit_id=3603 AND type='sc' LIMIT 1),'Lokales Netzwerk in einem Gebäude',1),
+((SELECT id FROM questions WHERE unit_id=3603 AND type='sc' LIMIT 1),'Virtuelles Netz',0),
+((SELECT id FROM questions WHERE unit_id=3603 AND type='sc' LIMIT 1),'Rechenzentrum',0),
+((SELECT id FROM questions WHERE unit_id=3603 AND type='tf' LIMIT 1),'Wahr',1),
+((SELECT id FROM questions WHERE unit_id=3603 AND type='tf' LIMIT 1),'Falsch',0),
+((SELECT id FROM questions WHERE unit_id=3603 AND type='mc' LIMIT 1),'LAN',1),
+((SELECT id FROM questions WHERE unit_id=3603 AND type='mc' LIMIT 1),'WAN',1),
+((SELECT id FROM questions WHERE unit_id=3603 AND type='mc' LIMIT 1),'MAN',1),
+((SELECT id FROM questions WHERE unit_id=3603 AND type='mc' LIMIT 1),'Desktop',0),
+-- 3604
+((SELECT id FROM questions WHERE unit_id=3604 AND type='sc' LIMIT 1),'Cloud-Backup',0),
+((SELECT id FROM questions WHERE unit_id=3604 AND type='sc' LIMIT 1),'Eigene Hardware im fremden Rechenzentrum',1),
+((SELECT id FROM questions WHERE unit_id=3604 AND type='sc' LIMIT 1),'Virtuelles LAN',0),
+((SELECT id FROM questions WHERE unit_id=3604 AND type='sc' LIMIT 1),'Desktop-PC',0),
+((SELECT id FROM questions WHERE unit_id=3604 AND type='tf' LIMIT 1),'Wahr',1),
+((SELECT id FROM questions WHERE unit_id=3604 AND type='tf' LIMIT 1),'Falsch',0),
+((SELECT id FROM questions WHERE unit_id=3604 AND type='mc' LIMIT 1),'File',1),
+((SELECT id FROM questions WHERE unit_id=3604 AND type='mc' LIMIT 1),'Print',1),
+((SELECT id FROM questions WHERE unit_id=3604 AND type='mc' LIMIT 1),'Mail',1),
+((SELECT id FROM questions WHERE unit_id=3604 AND type='mc' LIMIT 1),'Monitor',0),
+-- 3605
+((SELECT id FROM questions WHERE unit_id=3605 AND type='sc' LIMIT 1),'Minimal-Hardware',0),
+((SELECT id FROM questions WHERE unit_id=3605 AND type='sc' LIMIT 1),'Leistungsfähiger PC mit eigener Rechenleistung',1),
+((SELECT id FROM questions WHERE unit_id=3605 AND type='sc' LIMIT 1),'Nur Netzwerk',0),
+((SELECT id FROM questions WHERE unit_id=3605 AND type='sc' LIMIT 1),'Passiver Client',0),
+((SELECT id FROM questions WHERE unit_id=3605 AND type='tf' LIMIT 1),'Wahr',1),
+((SELECT id FROM questions WHERE unit_id=3605 AND type='tf' LIMIT 1),'Falsch',0),
+((SELECT id FROM questions WHERE unit_id=3605 AND type='mc' LIMIT 1),'Notebook',1),
+((SELECT id FROM questions WHERE unit_id=3605 AND type='mc' LIMIT 1),'Tablet',1),
+((SELECT id FROM questions WHERE unit_id=3605 AND type='mc' LIMIT 1),'Smartphone',1),
+((SELECT id FROM questions WHERE unit_id=3605 AND type='mc' LIMIT 1),'Server',0),
+-- 3606
+((SELECT id FROM questions WHERE unit_id=3606 AND type='sc' LIMIT 1),'Übertragungskapazität',1),
+((SELECT id FROM questions WHERE unit_id=3606 AND type='sc' LIMIT 1),'Signalgeschwindigkeit',0),
+((SELECT id FROM questions WHERE unit_id=3606 AND type='sc' LIMIT 1),'Datenrate',0),
+((SELECT id FROM questions WHERE unit_id=3606 AND type='sc' LIMIT 1),'Netzwerkpfad',0),
+((SELECT id FROM questions WHERE unit_id=3606 AND type='tf' LIMIT 1),'Wahr',0),
+((SELECT id FROM questions WHERE unit_id=3606 AND type='tf' LIMIT 1),'Falsch',1),
+((SELECT id FROM questions WHERE unit_id=3606 AND type='mc' LIMIT 1),'Seriell',1),
+((SELECT id FROM questions WHERE unit_id=3606 AND type='mc' LIMIT 1),'Parallel',1),
+((SELECT id FROM questions WHERE unit_id=3606 AND type='mc' LIMIT 1),'Simplex',1),
+((SELECT id FROM questions WHERE unit_id=3606 AND type='mc' LIMIT 1),'Desktop',0),
+-- 3607
+((SELECT id FROM questions WHERE unit_id=3607 AND type='sc' LIMIT 1),'Billig',0),
+((SELECT id FROM questions WHERE unit_id=3607 AND type='sc' LIMIT 1),'Hohe Geschwindigkeit, weite Strecken',1),
+((SELECT id FROM questions WHERE unit_id=3607 AND type='sc' LIMIT 1),'Nur im Ring nutzbar',0),
+((SELECT id FROM questions WHERE unit_id=3607 AND type='sc' LIMIT 1),'Kabellos',0),
+((SELECT id FROM questions WHERE unit_id=3607 AND type='tf' LIMIT 1),'Wahr',1),
+((SELECT id FROM questions WHERE unit_id=3607 AND type='tf' LIMIT 1),'Falsch',0),
+((SELECT id FROM questions WHERE unit_id=3607 AND type='mc' LIMIT 1),'Stern',1),
+((SELECT id FROM questions WHERE unit_id=3607 AND type='mc' LIMIT 1),'Bus',1),
+((SELECT id FROM questions WHERE unit_id=3607 AND type='mc' LIMIT 1),'Ring',1),
+((SELECT id FROM questions WHERE unit_id=3607 AND type='mc' LIMIT 1),'Desktop',0),
+-- 3608
+((SELECT id FROM questions WHERE unit_id=3608 AND type='sc' LIMIT 1),'Kollisionserkennung',0),
+((SELECT id FROM questions WHERE unit_id=3608 AND type='sc' LIMIT 1),'Kollisionsvermeidung',1),
+((SELECT id FROM questions WHERE unit_id=3608 AND type='sc' LIMIT 1),'Token',0),
+((SELECT id FROM questions WHERE unit_id=3608 AND type='sc' LIMIT 1),'Vollduplex',0),
+((SELECT id FROM questions WHERE unit_id=3608 AND type='tf' LIMIT 1),'Wahr',1),
+((SELECT id FROM questions WHERE unit_id=3608 AND type='tf' LIMIT 1),'Falsch',0),
+((SELECT id FROM questions WHERE unit_id=3608 AND type='mc' LIMIT 1),'CSMA/CD',1),
+((SELECT id FROM questions WHERE unit_id=3608 AND type='mc' LIMIT 1),'CSMA/CA',1),
+((SELECT id FROM questions WHERE unit_id=3608 AND type='mc' LIMIT 1),'Token Passing',1),
+((SELECT id FROM questions WHERE unit_id=3608 AND type='mc' LIMIT 1),'Simplex',0),
+-- 3609
+((SELECT id FROM questions WHERE unit_id=3609 AND type='sc' LIMIT 1),'Hardware-Adresse',1),
+((SELECT id FROM questions WHERE unit_id=3609 AND type='sc' LIMIT 1),'Logische Adresse',0),
+((SELECT id FROM questions WHERE unit_id=3609 AND type='sc' LIMIT 1),'Protokoll',0),
+((SELECT id FROM questions WHERE unit_id=3609 AND type='sc' LIMIT 1),'Speicher',0),
+((SELECT id FROM questions WHERE unit_id=3609 AND type='tf' LIMIT 1),'Wahr',1),
+((SELECT id FROM questions WHERE unit_id=3609 AND type='tf' LIMIT 1),'Falsch',0),
+((SELECT id FROM questions WHERE unit_id=3609 AND type='mc' LIMIT 1),'DHCP',1),
+((SELECT id FROM questions WHERE unit_id=3609 AND type='mc' LIMIT 1),'DNS',1),
+((SELECT id FROM questions WHERE unit_id=3609 AND type='mc' LIMIT 1),'HTTP',1),
+((SELECT id FROM questions WHERE unit_id=3609 AND type='mc' LIMIT 1),'SMS',0),
+-- 3610
+((SELECT id FROM questions WHERE unit_id=3610 AND type='sc' LIMIT 1),'Geringe Kosten',0),
+((SELECT id FROM questions WHERE unit_id=3610 AND type='sc' LIMIT 1),'Doppelte Systeme zur Ausfallsicherheit',1),
+((SELECT id FROM questions WHERE unit_id=3610 AND type='sc' LIMIT 1),'Nur Energiesparen',0),
+((SELECT id FROM questions WHERE unit_id=3610 AND type='sc' LIMIT 1),'Einzelsystem',0),
+((SELECT id FROM questions WHERE unit_id=3610 AND type='tf' LIMIT 1),'Wahr',1),
+((SELECT id FROM questions WHERE unit_id=3610 AND type='tf' LIMIT 1),'Falsch',0),
+((SELECT id FROM questions WHERE unit_id=3610 AND type='mc' LIMIT 1),'Virtualisierung',1),
+((SELECT id FROM questions WHERE unit_id=3610 AND type='mc' LIMIT 1),'Energieeffiziente Geräte',1),
+((SELECT id FROM questions WHERE unit_id=3610 AND type='mc' LIMIT 1),'Datenverlust',0),
+((SELECT id FROM questions WHERE unit_id=3610 AND type='mc' LIMIT 1),'Redundanz',0);
 
 COMMIT;

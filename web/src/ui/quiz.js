@@ -46,26 +46,49 @@ export async function renderQuizForUnit(root, unitId, options = { num: 10, timer
 		const form = root.querySelector('#quiz-form');
 		// Render options
 		if (q.type === 'sc') {
-			form.innerHTML = q.options.map(opt => `<label style="display:block;margin-bottom:0.7em;"><input type="radio" name="opt" value="${opt.id}" ${answers[q.id]?.includes(opt.id)?'checked':''}/> ${opt.label}</label>`).join('');
+			form.innerHTML = q.options.map(opt => `<label class="opt" style="display:block;margin-bottom:0.7em;"><input type="radio" name="opt" value="${opt.id}" ${answers[q.id]?.includes(opt.id)?'checked':''}/> ${opt.label}</label>`).join('');
 		} else if (q.type === 'mc') {
-			form.innerHTML = q.options.map(opt => `<label style="display:block;margin-bottom:0.7em;"><input type="checkbox" name="opt" value="${opt.id}" ${answers[q.id]?.includes(opt.id)?'checked':''}/> ${opt.label}</label>`).join('');
+			form.innerHTML = q.options.map(opt => `<label class="opt" style="display:block;margin-bottom:0.7em;"><input type="checkbox" name="opt" value="${opt.id}" ${answers[q.id]?.includes(opt.id)?'checked':''}/> ${opt.label}</label>`).join('');
 		} else if (q.type === 'tf') {
 			form.innerHTML = q.options.map(opt => `<button type="button" class="button" data-opt="${opt.id}">${opt.label}</button>`).join(' ');
 			form.querySelectorAll('button').forEach(btn => {
 				btn.onclick = async () => {
 					answers[q.id] = [Number(btn.dataset.opt)];
 					await answer(quiz.attempt_id, q.id, Number(btn.dataset.opt));
-					next();
+					// Feedback einfärben
+					form.querySelectorAll('button').forEach(b=>{
+						const opt = q.options.find(o=>o.id===Number(b.dataset.opt));
+						b.classList.remove('correct','wrong');
+						if(opt.is_correct) b.classList.add('correct');
+						else if (b===btn) b.classList.add('wrong');
+						b.disabled = true;
+					});
+					setTimeout(()=>next(),600);
 				};
 			});
 		}
 		// Option-Handler
-		if (q.type === 'sc' || q.type === 'mc') {
+		if (q.type === 'sc') {
 			form.onchange = async () => {
+				const radio = form.querySelector('input[type=radio]:checked');
+				if (!radio) return;
+				const oid = Number(radio.value);
+				answers[q.id] = [oid];
+				await answer(quiz.attempt_id, q.id, oid);
+				// Feedback
+				form.querySelectorAll('label.opt').forEach(l=>{
+					const id = Number(l.querySelector('input').value);
+					const opt = q.options.find(o=>o.id===id);
+					l.classList.remove('correct','wrong');
+					if(opt.is_correct) l.classList.add('correct');
+					else if (id===oid) l.classList.add('wrong');
+					l.querySelector('input').disabled = true;
+				});
+			};
+		} else if (q.type === 'mc') {
+			form.onchange = () => {
 				const vals = Array.from(form.querySelectorAll('input:checked')).map(i=>Number(i.value));
 				answers[q.id] = vals;
-				// Bei SC sofort answer, bei MC erst beim Weiter
-				if (q.type === 'sc' && vals.length) await answer(quiz.attempt_id, q.id, vals[0]);
 			};
 		}
 		// Weiter/Abgeben
@@ -73,6 +96,14 @@ export async function renderQuizForUnit(root, unitId, options = { num: 10, timer
 			if (!answers[q.id] || !answers[q.id].length) return alert('Bitte eine Antwort wählen!');
 			if (q.type === 'mc') {
 				for (const oid of answers[q.id]) await answer(quiz.attempt_id, q.id, oid);
+				// MC Feedback (alle richtigen grün, falsche markiert)
+				form.querySelectorAll('label.opt').forEach(l=>{
+					const id = Number(l.querySelector('input').value);
+					const opt = q.options.find(o=>o.id===id);
+					if(opt.is_correct) l.classList.add('correct');
+					else if (answers[q.id].includes(id)) l.classList.add('wrong');
+					l.querySelector('input').disabled = true;
+				});
 			}
 			if (idx+1 < quiz.questions.length) { idx++; render(); }
 			else { finished = true; render(); }
@@ -152,6 +183,12 @@ export async function startQuiz(scope, opts) {
 
 export function renderQuizHome(outlet) {
 	outlet.innerHTML = `
+		<style>
+		label.opt.correct { background:#183d24; border-radius:4px; padding:4px 6px; }
+		label.opt.wrong { background:#3d1a1a; border-radius:4px; padding:4px 6px; }
+		button.correct { background:#2c7a36 !important; }
+		button.wrong { background:#a33434 !important; }
+		</style>
 		<div class="card" id="quiz-home">
 			<h2 style="margin-top:0;">Quiz</h2>
 			<p style="margin:0 0 1rem 0;">Modus wählen: gesamtes Lernfeld, einzelne Unit (über Lernfelder-Ansicht) oder Prüfungstrainings.</p>
